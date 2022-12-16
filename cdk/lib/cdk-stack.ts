@@ -12,6 +12,7 @@ export class CdkStack extends cdk.Stack {
     super(scope, id, props);
 
     this.alertLambda = new lambda.Function(this, "alertLambda", {
+      functionName: "alertLambda",
       code: lambda.Code.fromAsset("lambda/alert"),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_16_X,
