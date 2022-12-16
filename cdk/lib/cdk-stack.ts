@@ -1,5 +1,4 @@
 import * as cdk from "aws-cdk-lib";
-import { CfnOutput } from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 
@@ -20,7 +19,7 @@ export class CdkStack extends cdk.Stack {
     this.alertApi = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
     });
-    new CfnOutput(this, "alertUrl", {
+    new cdk.CfnOutput(this, "alertUrl", {
       value: this.alertApi.url,
     });
   }
