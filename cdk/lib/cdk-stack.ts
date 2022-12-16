@@ -19,7 +19,7 @@ export class CdkStack extends cdk.Stack {
     this.alertApi = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
     });
-    new cdk.CfnOutput(this, "alertUrl", {
+    new cdk.CfnOutput(this, "alertUrlOutput", {
       value: this.alertApi.url,
     });
   }
