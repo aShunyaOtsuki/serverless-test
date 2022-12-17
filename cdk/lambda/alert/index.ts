@@ -4,12 +4,13 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { SQS, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 const dynamodbClient = new DynamoDB({});
-interface IUserTable {
+export interface IUserTable {
   getItem: (id: string) => Promise<UserRecord>;
 }
 type UserRecord = {
   id: string;
   mailAddress: string;
+  isNotifyAlert: boolean;
 };
 
 class UserDynamoDBTable implements IUserTable {
@@ -28,10 +29,10 @@ class UserDynamoDBTable implements IUserTable {
 const UserTable = (): IUserTable => new UserDynamoDBTable();
 
 const sqsClient = new SQS({});
-interface INotifyClient {
+export interface INotifyClient {
   notifyMessage: (message: NotifyMessage) => Promise<void>;
 }
-type NotifyMessage = {
+export type NotifyMessage = {
   mailAddress: string;
   content: string;
 };
@@ -48,14 +49,35 @@ class NotifyMessageSQS implements INotifyClient {
 }
 const NotifyClient = () => new NotifyMessageSQS();
 
-export const handler = async (event: APIGatewayProxyEventV2) => {
+export const main = async (
+  userId: string,
+  client: { userTable: IUserTable; notifyClient: INotifyClient }
+): Promise<void> => {
+  const { userTable, notifyClient } = client;
+
+  // NOTE: レコードのフラグによって、特定の機能を実行する。今回のアプリケーションの主な機能。
+  const userRecord = await userTable.getItem(userId);
+  if (userRecord.isNotifyAlert) {
+    await notifyClient.notifyMessage({
+      mailAddress: userRecord.mailAddress,
+      content: "alert",
+    });
+  }
+};
+
+export const handler = async (
+  event: APIGatewayProxyEventV2
+): Promise<string> => {
   console.log(event);
-  const userTable = UserTable();
-  const userRecord = await userTable.getItem("test-id");
-  console.log(userRecord);
-  const notifyClient = NotifyClient();
-  await notifyClient.notifyMessage({
-    mailAddress: userRecord.mailAddress,
-    content: "alert",
-  });
+  try {
+    const userTable = UserTable();
+    const notifyClient = NotifyClient();
+
+    const userId = event.rawPath.replace("/", "");
+    await main(userId, { userTable, notifyClient });
+    return "SUCCESS";
+  } catch (e) {
+    console.error(e);
+    return "ERROR";
+  }
 };
