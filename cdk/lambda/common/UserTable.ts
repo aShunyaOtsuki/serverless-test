@@ -5,7 +5,7 @@ const dynamodbClient = new DynamoDB({});
 export interface IUserTable {
   getItem: (id: string) => Promise<UserRecord>;
 }
-type UserRecord = {
+export type UserRecord = {
   id: string;
   mailAddress: string;
   isNotifyAlert: boolean;
