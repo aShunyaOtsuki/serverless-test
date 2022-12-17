@@ -67,6 +67,7 @@ export class CdkStack extends cdk.Stack {
       handler: "index.handler",
       environment: {
         ...tableNames,
+        QUEUE_URL: this.notifyQueue.queueUrl,
       },
       runtime: lambda.Runtime.NODEJS_16_X,
       layers: [packagesLayer],
@@ -76,6 +77,13 @@ export class CdkStack extends cdk.Stack {
         effect: iam.Effect.ALLOW,
         actions: ["dynamodb:GetItem"],
         resources: [this.userTable.tableArn],
+      })
+    );
+    this.alertLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["sqs:SendMessage"],
+        resources: [this.notifyQueue.queueArn],
       })
     );
     this.alertLambdaUrl = this.alertLambda.addFunctionUrl({

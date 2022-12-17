@@ -39,7 +39,7 @@ type NotifyMessage = {
 class NotifyMessageSQS implements INotifyClient {
   async notifyMessage(message: NotifyMessage) {
     const sendMessageCommand = new SendMessageCommand({
-      QueueUrl: process.env.QueueUrl,
+      QueueUrl: process.env.QUEUE_URL,
       MessageBody: JSON.stringify(message),
     });
     await sqsClient.send(sendMessageCommand);
