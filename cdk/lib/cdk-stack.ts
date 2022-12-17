@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 
 export class CdkStack extends cdk.Stack {
@@ -9,6 +10,7 @@ export class CdkStack extends cdk.Stack {
   userTable: dynamodb.Table;
   mailHistoryTable: dynamodb.Table;
   // テスト対象の機能
+  notifyQueue: sqs.Queue;
   alertLambda: lambda.Function;
   alertLambdaUrl: lambda.FunctionUrl;
 
@@ -39,6 +41,8 @@ export class CdkStack extends cdk.Stack {
       USER_DYNAMO_DB_TABLE_NAMES: this.userTable.tableName,
       MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryTable.tableName,
     };
+
+    this.notifyQueue = new sqs.Queue(this, "notifyQueue");
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
       layerVersionName: "packages",
