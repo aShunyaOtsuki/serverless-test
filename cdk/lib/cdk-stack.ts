@@ -11,6 +11,7 @@ export class CdkStack extends cdk.Stack {
   mailHistoryTable: dynamodb.Table;
   // テスト対象の機能
   notifyQueue: sqs.Queue;
+  notifyLambda: lambda.Function;
   alertLambda: lambda.Function;
   alertLambdaUrl: lambda.FunctionUrl;
 
@@ -43,6 +44,12 @@ export class CdkStack extends cdk.Stack {
     };
 
     this.notifyQueue = new sqs.Queue(this, "notifyQueue");
+    this.notifyLambda = new lambda.Function(this, "notifyLambda", {
+      functionName: "notify",
+      code: lambda.Code.fromAsset("lambda/notify"),
+      handler: "index.handler",
+      runtime: lambda.Runtime.NODEJS_16_X,
+    });
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
       layerVersionName: "packages",
