@@ -10,7 +10,7 @@ export class CdkStack extends cdk.Stack {
   mailHistoryTable: dynamodb.Table;
   // テスト対象の機能
   alertLambda: lambda.Function;
-  alertApi: lambda.FunctionUrl;
+  alertLambdaUrl: lambda.FunctionUrl;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -62,11 +62,11 @@ export class CdkStack extends cdk.Stack {
         resources: [this.userTable.tableArn],
       })
     );
-    this.alertApi = this.alertLambda.addFunctionUrl({
+    this.alertLambdaUrl = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
     });
     new cdk.CfnOutput(this, "alertUrlOutput", {
-      value: this.alertApi.url,
+      value: this.alertLambdaUrl.url,
     });
   }
 }
