@@ -10,7 +10,7 @@ export interface IUserTable {
 type UserRecord = {
   id: string;
   mailAddress: string;
-  isAlertNotify: boolean;
+  isNotifyAlert: boolean;
 };
 
 class UserDynamoDBTable implements IUserTable {
@@ -57,7 +57,7 @@ export const main = async (
 
   // NOTE: レコードのフラグによって、特定の機能を実行する。今回のアプリケーションの主な機能。
   const userRecord = await userTable.getItem(userId);
-  if (userRecord.isAlertNotify) {
+  if (userRecord.isNotifyAlert) {
     await notifyClient.notifyMessage({
       mailAddress: userRecord.mailAddress,
       content: "alert",
