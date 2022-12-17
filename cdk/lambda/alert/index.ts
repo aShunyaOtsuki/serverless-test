@@ -10,6 +10,8 @@ interface IUserTable {
 type UserRecord = {
   id: string;
   mailAddress: string;
+  isAlertNotify: boolean;
+  isValidMailAddress: boolean;
 };
 
 class UserDynamoDBTable implements IUserTable {
@@ -54,10 +56,12 @@ const main = async (
 ): Promise<void> => {
   const { userTable, notifyClient } = client;
   const userRecord = await userTable.getItem(userId);
-  await notifyClient.notifyMessage({
-    mailAddress: userRecord.mailAddress,
-    content: "alert",
-  });
+  if (userRecord.isAlertNotify) {
+    await notifyClient.notifyMessage({
+      mailAddress: userRecord.mailAddress,
+      content: "alert",
+    });
+  }
 };
 
 export const handler = async (
