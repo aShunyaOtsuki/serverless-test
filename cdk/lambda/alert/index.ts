@@ -7,15 +7,15 @@ interface IUserTable {
   getItem: (id: string) => Promise<UserRecord>;
 }
 type UserRecord = {
-  userId: string;
+  id: string;
   mailAddress: string;
 };
 
 class UserDynamoDB implements IUserTable {
-  async getItem(userId: string) {
+  async getItem(id: string) {
     const getItemCommand = new GetItemCommand({
       TableName: process.env.USER_DYNAMO_DB_TABLE_NAMES,
-      Key: marshall({ userId }),
+      Key: marshall({ id }),
     });
     const record = await dynamodbClient.send(getItemCommand);
     if (record.Item == null) {
