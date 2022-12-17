@@ -1,32 +1,32 @@
 import * as cdk from "aws-cdk-lib";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from "aws-cdk-lib/aws-iam";
+import * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 
 export class CdkStack extends cdk.Stack {
   // DB
-  userDB: dynamodb.Table;
-  mailHistoryDB: dynamodb.Table;
+  userTable: dynamodb.Table;
+  mailHistoryTable: dynamodb.Table;
   // テスト対象の機能
   alertLambda: lambda.Function;
-  alertApi: lambda.FunctionUrl;
+  alertLambdaUrl: lambda.FunctionUrl;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.userDB = new dynamodb.Table(this, "userDB", {
-      tableName: "userDB",
+    this.userTable = new dynamodb.Table(this, "userTable", {
+      tableName: "user",
       partitionKey: {
-        name: "userId",
+        name: "id",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
-    this.mailHistoryDB = new dynamodb.Table(this, "mailHistoryDB", {
-      tableName: "mailHistoryDB",
+    this.mailHistoryTable = new dynamodb.Table(this, "mailHistoryTable", {
+      tableName: "mailHistory",
       partitionKey: {
-        name: "mailAddress",
+        name: "id",
         type: dynamodb.AttributeType.STRING,
       },
       sortKey: {
@@ -36,17 +36,17 @@ export class CdkStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
     const tableNames = {
-      USER_DYNAMO_DB_TABLE_NAMES: this.userDB.tableName,
-      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableName,
+      USER_DYNAMO_DB_TABLE_NAMES: this.userTable.tableName,
+      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryTable.tableName,
     };
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
-      layerVersionName: "nodeModules",
+      layerVersionName: "packages",
       code: lambda.Code.fromAsset("layer"),
       compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
     });
     this.alertLambda = new lambda.Function(this, "alertLambda", {
-      functionName: "alertLambda",
+      functionName: "alert",
       code: lambda.Code.fromAsset("lambda/alert"),
       handler: "index.handler",
       environment: {
@@ -59,14 +59,14 @@ export class CdkStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["dynamodb:GetItem"],
-        resources: [this.userDB.tableArn],
+        resources: [this.userTable.tableArn],
       })
     );
-    this.alertApi = this.alertLambda.addFunctionUrl({
+    this.alertLambdaUrl = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
     });
     new cdk.CfnOutput(this, "alertUrlOutput", {
-      value: this.alertApi.url,
+      value: this.alertLambdaUrl.url,
     });
   }
 }

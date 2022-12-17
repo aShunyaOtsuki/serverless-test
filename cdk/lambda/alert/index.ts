@@ -7,15 +7,15 @@ interface IUserTable {
   getItem: (id: string) => Promise<UserRecord>;
 }
 type UserRecord = {
-  userId: string;
+  id: string;
   mailAddress: string;
 };
 
-class UserDynamoDB implements IUserTable {
-  async getItem(userId: string) {
+class UserDynamoDBTable implements IUserTable {
+  async getItem(id: string) {
     const getItemCommand = new GetItemCommand({
       TableName: process.env.USER_DYNAMO_DB_TABLE_NAMES,
-      Key: marshall({ userId }),
+      Key: marshall({ id }),
     });
     const record = await dynamodbClient.send(getItemCommand);
     if (record.Item == null) {
@@ -24,11 +24,11 @@ class UserDynamoDB implements IUserTable {
     return unmarshall(record.Item) as UserRecord;
   }
 }
-const userTableConnection = (): IUserTable => new UserDynamoDB();
+const UserTable = (): IUserTable => new UserDynamoDBTable();
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log(event);
-  const userTable = userTableConnection();
+  const userTable = UserTable();
   const userRecord = await userTable.getItem("test-id");
   console.log(userRecord);
 };
