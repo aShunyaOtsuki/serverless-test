@@ -39,14 +39,20 @@ export class CdkStack extends cdk.Stack {
       MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableArn,
     };
 
+    const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
+      layerVersionName: "nodeModules",
+      code: lambda.Code.fromAsset("layer/common"),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+    });
     this.alertLambda = new lambda.Function(this, "alertLambda", {
       functionName: "alertLambda",
       code: lambda.Code.fromAsset("lambda/alert"),
       handler: "index.handler",
-      runtime: lambda.Runtime.NODEJS_16_X,
       environment: {
         ...tableNames,
       },
+      runtime: lambda.Runtime.NODEJS_16_X,
+      layers: [packagesLayer],
     });
     this.alertApi = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
