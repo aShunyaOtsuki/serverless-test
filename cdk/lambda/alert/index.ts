@@ -1,32 +1,6 @@
 import { APIGatewayProxyEventV2 } from "aws-lambda";
-import { DynamoDB, GetItemCommand } from "@aws-sdk/client-dynamodb";
-import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { SQS, SendMessageCommand } from "@aws-sdk/client-sqs";
-
-const dynamodbClient = new DynamoDB({});
-export interface IUserTable {
-  getItem: (id: string) => Promise<UserRecord>;
-}
-type UserRecord = {
-  id: string;
-  mailAddress: string;
-  isNotifyAlert: boolean;
-};
-
-class UserDynamoDBTable implements IUserTable {
-  async getItem(id: string) {
-    const getItemCommand = new GetItemCommand({
-      TableName: process.env.USER_DYNAMO_DB_TABLE_NAMES,
-      Key: marshall({ id }),
-    });
-    const record = await dynamodbClient.send(getItemCommand);
-    if (record.Item == null) {
-      throw new Error("no-item");
-    }
-    return unmarshall(record.Item) as UserRecord;
-  }
-}
-const UserTable = (): IUserTable => new UserDynamoDBTable();
+import { IUserTable, UserTable } from "common/UserTable";
 
 const sqsClient = new SQS({});
 export interface INotifyClient {
