@@ -54,6 +54,8 @@ export const main = async (
   client: { userTable: IUserTable; notifyClient: INotifyClient }
 ): Promise<void> => {
   const { userTable, notifyClient } = client;
+
+  // NOTE: レコードのフラグによって、特定の機能を実行する。今回のアプリケーションの主な機能。
   const userRecord = await userTable.getItem(userId);
   if (userRecord.isAlertNotify) {
     await notifyClient.notifyMessage({
