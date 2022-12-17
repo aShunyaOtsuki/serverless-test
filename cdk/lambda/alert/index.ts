@@ -53,7 +53,7 @@ const main = async (
   client: { userTable: IUserTable; notifyClient: INotifyClient }
 ): Promise<void> => {
   const { userTable, notifyClient } = client;
-  const userRecord = await userTable.getItem("test-id");
+  const userRecord = await userTable.getItem(userId);
   await notifyClient.notifyMessage({
     mailAddress: userRecord.mailAddress,
     content: "alert",
@@ -67,7 +67,9 @@ export const handler = async (
   try {
     const userTable = UserTable();
     const notifyClient = NotifyClient();
-    await main("test-id", { userTable, notifyClient });
+
+    const userId = event.rawPath.replace("/", "");
+    await main(userId, { userTable, notifyClient });
     return "SUCCESS";
   } catch (e) {
     console.error(e);
