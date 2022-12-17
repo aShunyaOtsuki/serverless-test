@@ -34,12 +34,19 @@ export class CdkStack extends cdk.Stack {
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
+    const tableNames = {
+      USER_DYNAMO_DB_TABLE_NAMES: this.userDB.tableArn,
+      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableArn,
+    };
 
     this.alertLambda = new lambda.Function(this, "alertLambda", {
       functionName: "alertLambda",
       code: lambda.Code.fromAsset("lambda/alert"),
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_16_X,
+      environment: {
+        ...tableNames,
+      },
     });
     this.alertApi = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
