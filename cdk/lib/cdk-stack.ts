@@ -6,8 +6,8 @@ import { Construct } from "constructs";
 
 export class CdkStack extends cdk.Stack {
   // DB
-  userDB: dynamodb.Table;
-  mailHistoryDB: dynamodb.Table;
+  userTable: dynamodb.Table;
+  mailHistoryTable: dynamodb.Table;
   // テスト対象の機能
   alertLambda: lambda.Function;
   alertApi: lambda.FunctionUrl;
@@ -15,16 +15,16 @@ export class CdkStack extends cdk.Stack {
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
 
-    this.userDB = new dynamodb.Table(this, "userDB", {
-      tableName: "userDB",
+    this.userTable = new dynamodb.Table(this, "userTable", {
+      tableName: "userTable",
       partitionKey: {
         name: "userId",
         type: dynamodb.AttributeType.STRING,
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
-    this.mailHistoryDB = new dynamodb.Table(this, "mailHistoryDB", {
-      tableName: "mailHistoryDB",
+    this.mailHistoryTable = new dynamodb.Table(this, "mailHistoryTable", {
+      tableName: "mailHistoryTable",
       partitionKey: {
         name: "mailAddress",
         type: dynamodb.AttributeType.STRING,
@@ -36,8 +36,8 @@ export class CdkStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
     const tableNames = {
-      USER_DYNAMO_DB_TABLE_NAMES: this.userDB.tableName,
-      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableName,
+      USER_DYNAMO_DB_TABLE_NAMES: this.userTable.tableName,
+      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryTable.tableName,
     };
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
@@ -59,7 +59,7 @@ export class CdkStack extends cdk.Stack {
       new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ["dynamodb:GetItem"],
-        resources: [this.userDB.tableArn],
+        resources: [this.userTable.tableArn],
       })
     );
     this.alertApi = this.alertLambda.addFunctionUrl({
