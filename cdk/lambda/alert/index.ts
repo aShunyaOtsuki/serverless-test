@@ -48,14 +48,29 @@ class NotifyMessageSQS implements INotifyClient {
 }
 const NotifyClient = () => new NotifyMessageSQS();
 
-export const handler = async (event: APIGatewayProxyEventV2) => {
-  console.log(event);
-  const userTable = UserTable();
+const main = async (
+  userId: string,
+  client: { userTable: IUserTable; notifyClient: INotifyClient }
+): Promise<void> => {
+  const { userTable, notifyClient } = client;
   const userRecord = await userTable.getItem("test-id");
-  console.log(userRecord);
-  const notifyClient = NotifyClient();
   await notifyClient.notifyMessage({
     mailAddress: userRecord.mailAddress,
     content: "alert",
   });
+};
+
+export const handler = async (
+  event: APIGatewayProxyEventV2
+): Promise<string> => {
+  console.log(event);
+  try {
+    const userTable = UserTable();
+    const notifyClient = NotifyClient();
+    await main("test-id", { userTable, notifyClient });
+    return "SUCCESS";
+  } catch (e) {
+    console.error(e);
+    return "ERROR";
+  }
 };
