@@ -1,5 +1,6 @@
-import { main, INotifyClient, NotifyMessage } from "../../../lambda/alert";
+import { main } from "../../../lambda/alert";
 import { IUserTable } from "common/UserTable";
+import { INotifyClient, NotifyMessage } from "common/NotifyClient";
 
 const fn = jest.fn();
 
