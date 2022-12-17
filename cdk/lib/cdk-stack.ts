@@ -2,6 +2,7 @@ import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as lambdaEventSource from "aws-cdk-lib/aws-lambda-event-sources";
 import * as sqs from "aws-cdk-lib/aws-sqs";
 import { Construct } from "constructs";
 
@@ -51,6 +52,9 @@ export class CdkStack extends cdk.Stack {
       handler: "index.handler",
       runtime: lambda.Runtime.NODEJS_16_X,
     });
+    this.notifyLambda.addEventSource(
+      new lambdaEventSource.SqsEventSource(this.notifyQueue)
+    );
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
       layerVersionName: "packages",
