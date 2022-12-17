@@ -16,7 +16,7 @@ export class CdkStack extends cdk.Stack {
     super(scope, id, props);
 
     this.userTable = new dynamodb.Table(this, "userTable", {
-      tableName: "userTable",
+      tableName: "user",
       partitionKey: {
         name: "userId",
         type: dynamodb.AttributeType.STRING,
@@ -24,7 +24,7 @@ export class CdkStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
     this.mailHistoryTable = new dynamodb.Table(this, "mailHistoryTable", {
-      tableName: "mailHistoryTable",
+      tableName: "mailHistory",
       partitionKey: {
         name: "mailAddress",
         type: dynamodb.AttributeType.STRING,
