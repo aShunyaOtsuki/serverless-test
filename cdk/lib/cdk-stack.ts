@@ -41,7 +41,7 @@ export class CdkStack extends cdk.Stack {
     };
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
-      layerVersionName: "nodeModules",
+      layerVersionName: "packages",
       code: lambda.Code.fromAsset("layer"),
       compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
     });
