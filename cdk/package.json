@@ -23,6 +23,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.231.0",
+    "@aws-sdk/util-dynamodb": "^3.231.0",
     "aws-cdk-lib": "2.38.1",
     "constructs": "^10.0.0",
     "source-map-support": "^0.5.21"
