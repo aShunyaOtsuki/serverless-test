@@ -35,8 +35,8 @@ export class CdkStack extends cdk.Stack {
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
     const tableNames = {
-      USER_DYNAMO_DB_TABLE_NAMES: this.userDB.tableArn,
-      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableArn,
+      USER_DYNAMO_DB_TABLE_NAMES: this.userDB.tableName,
+      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableName,
     };
 
     const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
