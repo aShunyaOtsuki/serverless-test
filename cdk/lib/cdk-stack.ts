@@ -44,6 +44,7 @@ export class CdkStack extends cdk.Stack {
     };
 
     this.notifyQueue = new sqs.Queue(this, "notifyQueue");
+    // FIXME: notifyLambdaはdummy実装
     this.notifyLambda = new lambda.Function(this, "notifyLambda", {
       functionName: "notify",
       code: lambda.Code.fromAsset("lambda/notify"),
