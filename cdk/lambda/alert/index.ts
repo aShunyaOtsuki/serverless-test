@@ -35,6 +35,7 @@ type NotifyMessage = {
   mailAddress: string;
   content: string;
 };
+
 class NotifyMessageSQS implements INotifyClient {
   async notifyMessage(message: NotifyMessage) {
     const sendMessageCommand = new SendMessageCommand({
