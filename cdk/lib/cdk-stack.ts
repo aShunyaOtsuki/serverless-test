@@ -15,6 +15,9 @@ export class CdkStack extends cdk.Stack {
   notifyLambda: lambda.Function;
   alertLambda: lambda.Function;
   alertLambdaUrl: lambda.FunctionUrl;
+  // DB接続のテスト
+  testDBLambda: lambda.Function;
+  testDBLambdaUrl: lambda.FunctionUrl;
 
   constructor(scope: Construct, id: string, props?: cdk.StackProps) {
     super(scope, id, props);
@@ -91,6 +94,30 @@ export class CdkStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, "alertUrlOutput", {
       value: this.alertLambdaUrl.url,
+    });
+
+    this.testDBLambda = new lambda.Function(this, "testDBLambda", {
+      functionName: "testDB",
+      code: lambda.Code.fromAsset("lambda/testHandler"),
+      handler: "db.handler",
+      environment: {
+        ...tableNames,
+      },
+      runtime: lambda.Runtime.NODEJS_16_X,
+      layers: [packagesLayer],
+    });
+    this.testDBLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:GetItem"],
+        resources: [this.userTable.tableArn],
+      })
+    );
+    this.testDBLambdaUrl = this.testDBLambda.addFunctionUrl({
+      authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
+    });
+    new cdk.CfnOutput(this, "testDBLambdaUrlOutput", {
+      value: this.testDBLambdaUrl.url,
     });
   }
 }
