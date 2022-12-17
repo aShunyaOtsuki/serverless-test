@@ -1,6 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
+import * as iam from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 
 export class CdkStack extends cdk.Stack {
@@ -34,13 +35,33 @@ export class CdkStack extends cdk.Stack {
       },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     });
+    const tableNames = {
+      USER_DYNAMO_DB_TABLE_NAMES: this.userDB.tableName,
+      MAIL_HISTORY_DYNAMO_DB_TABLE_NAMES: this.mailHistoryDB.tableName,
+    };
 
+    const packagesLayer = new lambda.LayerVersion(this, "packagesLayer", {
+      layerVersionName: "nodeModules",
+      code: lambda.Code.fromAsset("layer"),
+      compatibleRuntimes: [lambda.Runtime.NODEJS_16_X],
+    });
     this.alertLambda = new lambda.Function(this, "alertLambda", {
       functionName: "alertLambda",
       code: lambda.Code.fromAsset("lambda/alert"),
       handler: "index.handler",
+      environment: {
+        ...tableNames,
+      },
       runtime: lambda.Runtime.NODEJS_16_X,
+      layers: [packagesLayer],
     });
+    this.alertLambda.addToRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ["dynamodb:GetItem"],
+        resources: [this.userDB.tableArn],
+      })
+    );
     this.alertApi = this.alertLambda.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE, // FIXME: 簡易的に設定している。
     });
