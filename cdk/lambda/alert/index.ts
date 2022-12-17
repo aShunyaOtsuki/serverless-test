@@ -11,7 +11,7 @@ type UserRecord = {
   mailAddress: string;
 };
 
-class UserDynamoDB implements IUserTable {
+class UserDynamoDBTable implements IUserTable {
   async getItem(id: string) {
     const getItemCommand = new GetItemCommand({
       TableName: process.env.USER_DYNAMO_DB_TABLE_NAMES,
@@ -24,11 +24,11 @@ class UserDynamoDB implements IUserTable {
     return unmarshall(record.Item) as UserRecord;
   }
 }
-const userTableConnection = (): IUserTable => new UserDynamoDB();
+const UserTable = (): IUserTable => new UserDynamoDBTable();
 
 export const handler = async (event: APIGatewayProxyEventV2) => {
   console.log(event);
-  const userTable = userTableConnection();
+  const userTable = UserTable();
   const userRecord = await userTable.getItem("test-id");
   console.log(userRecord);
 };
