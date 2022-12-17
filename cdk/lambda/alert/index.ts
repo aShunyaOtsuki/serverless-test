@@ -4,14 +4,13 @@ import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { SQS, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 const dynamodbClient = new DynamoDB({});
-interface IUserTable {
+export interface IUserTable {
   getItem: (id: string) => Promise<UserRecord>;
 }
 type UserRecord = {
   id: string;
   mailAddress: string;
   isAlertNotify: boolean;
-  isValidMailAddress: boolean;
 };
 
 class UserDynamoDBTable implements IUserTable {
@@ -30,10 +29,10 @@ class UserDynamoDBTable implements IUserTable {
 const UserTable = (): IUserTable => new UserDynamoDBTable();
 
 const sqsClient = new SQS({});
-interface INotifyClient {
+export interface INotifyClient {
   notifyMessage: (message: NotifyMessage) => Promise<void>;
 }
-type NotifyMessage = {
+export type NotifyMessage = {
   mailAddress: string;
   content: string;
 };
@@ -50,7 +49,7 @@ class NotifyMessageSQS implements INotifyClient {
 }
 const NotifyClient = () => new NotifyMessageSQS();
 
-const main = async (
+export const main = async (
   userId: string,
   client: { userTable: IUserTable; notifyClient: INotifyClient }
 ): Promise<void> => {
